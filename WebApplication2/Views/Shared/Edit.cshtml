@@ -1,0 +1,29 @@
+﻿@model WebApplication2.Models.Employee
+
+<h1>Edit Employee</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+
+    <div>
+        <label asp-for="Position"></label>
+        <input asp-for="Position" />
+        <span asp-validation-for="Position"></span>
+    </div>
+
+    <div>
+        <label asp-for="Salary"></label>
+        <input asp-for="Salary" type="number" />
+        <span asp-validation-for="Salary"></span>
+    </div>
+
+    <button type="submit">Save</button>
+</form>
+
+<a asp-action="Index">Back to list</a>

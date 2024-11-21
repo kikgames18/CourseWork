@@ -1,9 +1,9 @@
-﻿using WebApplication2.Data;
-using WebApplication2.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// File: EmployeeService.cs
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using WebApplication2.Data;
+using WebApplication2.Models;
 
 namespace WebApplication2.Services
 {
@@ -16,39 +16,63 @@ namespace WebApplication2.Services
             _context = context;
         }
 
-        public async Task<List<Employee>> GetAllAsync() => await _context.Employees.ToListAsync();
-
-        public async Task<Employee> GetAsync(int id) => await _context.Employees.FindAsync(id);
-
-        public async Task<Employee> AddAsync(Employee employee)
+        public async Task<IEnumerable<Employee>> GetAllAsync()
         {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-            return employee;
+            return await _context.Employees.ToListAsync();
         }
 
-        public async Task<Employee> UpdateAsync(Employee employee)
+        public async Task<Employee?> GetAsync(int id)
         {
-            var existingEmployee = await _context.Employees.FindAsync(employee.Id);
-            if (existingEmployee == null) return null;
-
-            existingEmployee.EmployeeId = employee.EmployeeId;
-            existingEmployee.Position = employee.Position;
-            existingEmployee.Hours = employee.Hours;
-            existingEmployee.ContactInfo = employee.ContactInfo;
-            existingEmployee.EnterpriseId = employee.EnterpriseId;
-            await _context.SaveChangesAsync();
-            return existingEmployee;
+            return await _context.Employees.FindAsync(id);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task AddAsync(Employee employee)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return false;
+            try
+            {
+                await _context.Employees.AddAsync(employee);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Логируем ошибку
+                Console.WriteLine($"Error adding employee: {ex.Message}");
+            }
+        }
 
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
-            return true;
+        public async Task UpdateAsync(Employee employee)
+        {
+            try
+            {
+                if (await _context.Employees.FindAsync(employee.Id) == null)
+                {
+                    throw new KeyNotFoundException("Employee not found.");
+                }
+                _context.Employees.Update(employee);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating employee: {ex.Message}");
+            }
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            try
+            {
+                var employee = await _context.Employees.FindAsync(id);
+                if (employee == null)
+                {
+                    throw new KeyNotFoundException("Employee not found.");
+                }
+                _context.Employees.Remove(employee);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting employee: {ex.Message}");
+            }
         }
     }
 }

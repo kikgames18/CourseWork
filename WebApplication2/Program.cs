@@ -1,32 +1,52 @@
+// File: Program.cs
 using Microsoft.EntityFrameworkCore;
+using WebApplication2;
 using WebApplication2.Data;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-
+using WebApplication2.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавление служб контроллеров и CORS для разрешения всех источников (для разработки)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
-// Регистрация ApplicationDbContext в DI-контейнере
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+// Add services to the container
 builder.Services.AddControllersWithViews();
+
+// Configure PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// Register EmployeeService
+builder.Services.AddScoped<EmployeeService>();
+
+// Add CORS policy (Development only)
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowDevelopmentCors", policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
+}
 
 var app = builder.Build();
 
-// Разрешение CORS
-app.UseCors("AllowAll");
+// Middleware pipeline
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+else
+{
+    app.UseCors("AllowDevelopmentCors");
+}
+
+app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 app.UseAuthorization();
 

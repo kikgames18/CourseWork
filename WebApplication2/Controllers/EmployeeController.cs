@@ -1,113 +1,64 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApplication2.Data;
+using WebApplication2.Services;
 using WebApplication2.Models;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApplication2.Controllers
+public class EmployeeController : Controller
 {
-    [ApiController]
-    [Route("Employee")]
-    public class EmployeeController : ControllerBase
+    private readonly EmployeeService _employeeService;
+
+    public EmployeeController(EmployeeService employeeService)
     {
-        private readonly ApplicationDbContext _context;
+        _employeeService = employeeService;
+    }
 
-        public EmployeeController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+    // Отображение списка сотрудников на странице
+    public async Task<IActionResult> Index()
+    {
+        var employees = await _employeeService.GetAllAsync();
+        return View(employees);
+    }
 
-        [HttpGet("Index")]
-        public async Task<IActionResult> Index()
-        {
-            try
-            {
-                var employees = await _context.Employees.ToListAsync();
-                if (employees == null || !employees.Any())
-                {
-                    return NotFound("No employees found.");
-                }
+    // API для получения списка сотрудников в формате JSON
+    [HttpGet("api/employees")]
+    public async Task<IActionResult> GetEmployees()
+    {
+        var employees = await _employeeService.GetAllAsync();
+        return Json(employees); // Возвращаем список сотрудников как JSON
+    }
 
-                // Логируем JSON-данные в консоль для проверки
-                Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(employees));
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var employee = await _employeeService.GetAsync(id);
+        if (employee == null) return NotFound();
 
-                return Ok(employees);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+        return View(employee);
+    }
 
+    [HttpPost]
+    public async Task<IActionResult> Edit(Employee updatedEmployee)
+    {
+        await _employeeService.UpdateAsync(updatedEmployee);
+        return RedirectToAction(nameof(Index));
+    }
 
-        [HttpPost("Edit")]
-        public async Task<IActionResult> Edit([FromQuery] int id, [FromBody] Employee updatedEmployee)
-        {
-            try
-            {
-                var existingEmployee = await _context.Employees.FindAsync(id);
-                if (existingEmployee == null)
-                {
-                    return NotFound("Employee not found.");
-                }
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _employeeService.DeleteAsync(id);
+        return RedirectToAction(nameof(Index));
+    }
 
-                existingEmployee.EmployeeId = updatedEmployee.EmployeeId;
-                existingEmployee.Position = updatedEmployee.Position;
-                existingEmployee.Hours = updatedEmployee.Hours;
-                existingEmployee.ContactInfo = updatedEmployee.ContactInfo;
-                existingEmployee.EnterpriseId = updatedEmployee.EnterpriseId;
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
+    }
 
-                await _context.SaveChangesAsync();
-
-                return Ok("Employee updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpDelete("Delete")]
-        public async Task<IActionResult> Delete([FromQuery] int id)
-        {
-            try
-            {
-                var employee = await _context.Employees.FindAsync(id);
-                if (employee == null)
-                {
-                    return NotFound("Employee not found.");
-                }
-
-                _context.Employees.Remove(employee);
-                await _context.SaveChangesAsync();
-
-                return Ok("Employee deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPost("Create")]
-        public async Task<IActionResult> Create([FromBody] Employee newEmployee)
-        {
-            try
-            {
-                await _context.Employees.AddAsync(newEmployee);
-                await _context.SaveChangesAsync();
-
-                return Ok("Employee created successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+    [HttpPost]
+    public async Task<IActionResult> Create(Employee newEmployee)
+    {
+        await _employeeService.AddAsync(newEmployee);
+        return RedirectToAction(nameof(Index));
     }
 }

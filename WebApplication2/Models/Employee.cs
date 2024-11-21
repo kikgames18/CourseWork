@@ -1,32 +1,32 @@
-using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace WebApplication2.Models
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+
+    [Table("employee")]
     public class Employee
     {
-        [JsonProperty("id")]
+        [Key]
         [Column("id")]
         public int Id { get; set; }
 
-        [JsonProperty("employee_id")]
+        [Required]
         [Column("employee_id")]
-        public int? EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
 
-        [JsonProperty("position")]
+        [Required]
+        [StringLength(100)]
         [Column("position")]
-        public string? Position { get; set; }
+        public string Position { get; set; } = string.Empty; // Исправлено
 
-        [JsonProperty("hours")]
         [Column("hours")]
-        public int? Hours { get; set; }
+        public int Hours { get; set; }
 
-        [JsonProperty("contact_info")]
+        [StringLength(255)]
         [Column("contact_info")]
         public string? ContactInfo { get; set; }
 
-        [JsonProperty("enterprise_id")]
         [Column("enterprise_id")]
-        public int? EnterpriseId { get; set; }
+        public int EnterpriseId { get; set; }
     }
 }

@@ -5,8 +5,7 @@ namespace WebApplication2.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
@@ -14,8 +13,7 @@ namespace WebApplication2.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Employee>().ToTable("employee"); // Указываем точное имя таблицы в базе данных
+            modelBuilder.Entity<Employee>().ToTable("employee");
         }
     }
 }
