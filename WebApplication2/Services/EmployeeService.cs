@@ -34,19 +34,20 @@ namespace WebApplication2.Services
         // Создание нового сотрудника
         public async Task CreateAsync(Employee employee)
         {
-            // Проверка на уникальность id, если у тебя вручную задается Id
+            // Check if the employee with the same Id already exists
             var existingEmployee = await _context.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.Id == employee.Id);
             if (existingEmployee != null)
             {
-                throw new Exception("Employee with the same ID already exists.");
+                // If the employee exists, update it instead of creating a new one
+                await UpdateAsync(employee);
+                return;
             }
 
-            // Удаляем установку ID, если используется автоинкремент
-            // employee.Id = 0; // Если нужно явно сбросить Id для автоинкремента
-
+            // Create a new employee
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
         }
+
 
         // Обновление информации о сотруднике
         public async Task UpdateAsync(Employee employee)
@@ -57,15 +58,21 @@ namespace WebApplication2.Services
                 throw new Exception("Employee not found");
             }
 
-            // Обновляем свойства
             existingEmployee.EmployeeId = employee.EmployeeId;
             existingEmployee.Position = employee.Position;
             existingEmployee.Hours = employee.Hours;
             existingEmployee.ContactInfo = employee.ContactInfo;
             existingEmployee.EnterpriseId = employee.EnterpriseId;
 
+            // If the Id is changed, update it
+            if (existingEmployee.Id != employee.Id)
+            {
+                existingEmployee.Id = employee.Id;
+            }
+
             await _context.SaveChangesAsync();
         }
+
 
         // Удаление сотрудника по Id
         public async Task DeleteAsync(int id)
