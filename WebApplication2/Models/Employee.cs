@@ -7,6 +7,7 @@ namespace WebApplication2.Models
     public class Employee
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public int? Id { get; set; }
 
