@@ -8,7 +8,7 @@ namespace WebApplication2.Models
     {
         [Key]
         [Column("id")]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         [Required]
         [Column("employee_id")]

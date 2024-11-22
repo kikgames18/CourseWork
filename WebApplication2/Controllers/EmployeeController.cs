@@ -1,64 +1,72 @@
 using Microsoft.AspNetCore.Mvc;
-using WebApplication2.Services;
-using WebApplication2.Models;
 using System.Threading.Tasks;
+using WebApplication2.Models;
+using WebApplication2.Services;
 
-public class EmployeeController : Controller
+namespace WebApplication2.Controllers
 {
-    private readonly EmployeeService _employeeService;
-
-    public EmployeeController(EmployeeService employeeService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class EmployeeController : ControllerBase
     {
-        _employeeService = employeeService;
-    }
+        private readonly EmployeeService _employeeService;
 
-    // ќтображение списка сотрудников на странице
-    public async Task<IActionResult> Index()
-    {
-        var employees = await _employeeService.GetAllAsync();
-        return View(employees);
-    }
+        public EmployeeController(EmployeeService employeeService)
+        {
+            _employeeService = employeeService;
+        }
 
-    // API дл€ получени€ списка сотрудников в формате JSON
-    [HttpGet("api/employees")]
-    public async Task<IActionResult> GetEmployees()
-    {
-        var employees = await _employeeService.GetAllAsync();
-        return Json(employees); // ¬озвращаем список сотрудников как JSON
-    }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var employees = await _employeeService.GetAllAsync();
+            return Ok(employees);
+        }
 
-    [HttpGet]
-    public async Task<IActionResult> Edit(int id)
-    {
-        var employee = await _employeeService.GetAsync(id);
-        if (employee == null) return NotFound();
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var employee = await _employeeService.GetByIdAsync(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return Ok(employee);
+        }
 
-        return View(employee);
-    }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Employee employee)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+                Console.WriteLine(string.Join("; ", errors)); // Ћог ошибок
+                return BadRequest(ModelState);
+            }
 
-    [HttpPost]
-    public async Task<IActionResult> Edit(Employee updatedEmployee)
-    {
-        await _employeeService.UpdateAsync(updatedEmployee);
-        return RedirectToAction(nameof(Index));
-    }
+            await _employeeService.CreateAsync(employee);
+            return CreatedAtAction(nameof(GetById), new { id = employee.Id }, employee);
+        }
 
-    public async Task<IActionResult> Delete(int id)
-    {
-        await _employeeService.DeleteAsync(id);
-        return RedirectToAction(nameof(Index));
-    }
 
-    [HttpGet]
-    public IActionResult Create()
-    {
-        return View();
-    }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(Employee newEmployee)
-    {
-        await _employeeService.AddAsync(newEmployee);
-        return RedirectToAction(nameof(Index));
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Employee employee)
+        {
+            if (id != employee.Id)
+            {
+                return BadRequest();
+            }
+
+            await _employeeService.UpdateAsync(employee);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _employeeService.DeleteAsync(id);
+            return NoContent();
+        }
     }
 }
