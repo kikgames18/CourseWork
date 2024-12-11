@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h2>Авторизация</h2>
+    <form id="roleForm">
+        <label for="role">Выберите роль:</label>
+        <select id="role" name="role">
+            <option value="respondent">Респондент</option>
+            <option value="creator">Создатель</option>
+            <option value="admin">Администратор</option>
+        </select>
+        <button type="submit">Войти</button>
+    </form>
+
+    <script>
+        // Логика перенаправления по ролям
+        document.getElementById('roleForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Предотвращение стандартного поведения формы
+            const role = document.getElementById('role').value;
+
+            switch (role) {
+                case 'respondent':
+                    window.location.href = '/html/respondent.html';
+                    break;
+                case 'creator':
+                    window.location.href = '/html/creator.html';
+                    break;
+                case 'admin':
+                    window.location.href = '/html/admin.html';
+                    break;
+                default:
+                    alert('Пожалуйста, выберите роль.');
+            }
+        });
+    </script>
+</body>
+</html>
