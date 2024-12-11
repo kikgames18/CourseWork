@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать новый опрос</title>
+    <link rel="stylesheet" href="/css/styles1.css">
+</head>
+<body>
+    <header>
+        <h1>Создать новый опрос</h1>
+    </header>
+
+    <main>
+        <section id="create-survey">
+            <h2>Создать новый опрос</h2>
+            <form id="surveyForm">
+                <label for="surveyTitle">Название опроса:</label>
+                <input type="text" id="surveyTitle" name="surveyTitle" required>
+
+                <label for="surveyDescription">Описание:</label>
+                <textarea id="surveyDescription" name="surveyDescription" required></textarea>
+
+                <button type="submit">Создать опрос</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Веб-сервис для опросов</p>
+    </footer>
+
+    <script src="script.js"></script> <!-- Подключение JavaScript для функциональности -->
+</body>
+</html>
